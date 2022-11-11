@@ -1,0 +1,36 @@
+WHITESPACE = _{ " " }
+COMMENT = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" }
+
+alpha = { 'a'..'z' | 'A'..'Z' }
+digit = { '0'..'9' }
+underscore = { "_" }
+newline = _{ "\n" | "\r" }
+
+name = @{alpha ~ (alpha | digit)* }
+string = { "\"" ~ (raw_string)* ~ "\"" }
+    raw_string = _{ (!("\\" | "\"") ~ ANY)+ }
+number = @{digit+}
+val = _{ name | number | string }
+
+assignment = { set ~ name ~ equals ~ (expr | val) }
+	set = _{ "set" }
+    equals = { "=" }
+
+function_call = { name ~ (val)* }
+
+expr = {
+	val ~ (plus | minus | div | mult) ~ val
+}
+	plus= { "+" }
+    minus= { "-" }
+    div= { "/" }
+    mult= { "*" }
+
+stmt = _{
+	(
+    	assignment |
+    	function_call
+    ) ~ newline*
+}
+
+file = _{ SOI ~ stmt* ~ EOI }
